@@ -21,7 +21,8 @@ def sql_insert(con, values):
         """, values)
         con.commit()
     except sql.Error as error:
-        click.echo("Error inserting account: " + error)
+        click.echo("Error inserting account:")
+        click.echo(error)
 
 def sql_query_accounts(con, val):
     """returns cursor of accounts that match specific account"""
@@ -80,3 +81,29 @@ def print_table(cursor):
     """prints table of accounts"""
     table = from_db_cursor(cursor)
     print(table.get_string())
+
+def is_blank(string):
+    """checks if string is either empty or just whitespace"""
+    if not string or string.isspace():
+        return True
+    return False
+
+def prompt_field(prompt):
+    field = click.prompt(prompt, default="",show_default=False)
+    if is_blank(field): field = None
+    return field
+
+def prompt_rfield(prompt, prompt_name):
+    """prompt user for a required field"""
+    while True:
+        field = click.prompt(prompt, default="", show_default=False)
+        if not is_blank(field): return field
+        click.echo("Field {} is required.".format(prompt_name))
+    
+def qprompt(string):
+    """quit option for prompt"""
+    if not string == None and string.strip() == "q":
+        click.echo("Prompt quit.")
+        return True
+    return False
+

@@ -7,15 +7,24 @@ def cli():
 
 @cli.command()
 def add():
-    account = click.prompt('Account', default=None)
-    user = click.prompt('Username', default=None)
-    email = click.prompt('Email', default=None)
-    tag = click.prompt('Tag', default=None)
-    password = click.prompt('Password', default=None)
-    
+    click.echo("Enter account details (\033[37;1m!\033[0m = required).")
+    click.echo("Press \033[37;1mq\033[0m to quit.")
+
+    account = prompt_rfield("\033[37;1m!\033[0mAccount", "account")
+    if qprompt(account): return None
+    user = prompt_field('Username')
+    if qprompt(user): return None
+    email = prompt_field('Email')
+    if qprompt(email): return None
+    tag = prompt_field('Tag')
+    if qprompt(tag): return None
+    password = prompt_rfield("\033[37;1m!\033[0mPassword", "password")
+    if qprompt(password): return None
+
     con = sqllite_connect()
-    sql_insert(con,(account, user, password, email, tag))
+    sql_insert(con, (account, user, password, email, tag))
     con.close()
+
 
 @cli.command()
 def delete(id):
