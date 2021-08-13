@@ -1,5 +1,4 @@
 import sqlite3 as sql
-from sqlite3.dbapi2 import DatabaseError
 from prettytable import from_db_cursor
 import click 
 
@@ -19,7 +18,7 @@ def sql_insert(con, values):
         cursor.execute("""
         INSERT INTO accounts (account, username, password, email, tag)
         VALUES (?,?,?,?,?)
-        """,values)
+        """, values)
         con.commit()
     except sql.Error as error:
         click.echo("Error inserting account: " + error)
@@ -31,10 +30,11 @@ def sql_query_accounts(con, val):
         cursor.execute("""
         SELECT * FROM accounts
         WHERE account=?
-        """, (val))
+        """, (val,))
         return cursor # returns cursor query
     except sql.Error as error:
-        click.echo("Error querying accounts: " + error)
+        click.echo("Error querying accounts:")
+        click.echo(error)
 
 def sql_query_tags(con, val):
     """returns cursor of accounts that match specific tag"""
@@ -43,10 +43,24 @@ def sql_query_tags(con, val):
         cursor.execute("""
         SELECT * FROM accounts
         WHERE tag=?
-        """, (val))
+        """, (val,))
         return cursor # returns cursor query
     except sql.Error as error:
-        click.echo("Error querying accounts: " + error)
+        click.echo("Error querying accounts:")
+        click.echo(error)
+
+def sql_query_id(con, val):
+    """returns cursor of accounts that match specific tag"""
+    cursor = con.cursor()
+    try:
+        cursor.execute("""
+        SELECT * FROM accounts
+        WHERE id=?
+        """, (val,))
+        return cursor # returns cursor query
+    except sql.Error as error:
+        click.echo("Error querying accounts:")
+        click.echo(error)
 
 def sql_fetch_all(con):
     """return cursor with all rows from the accounts table"""
