@@ -27,9 +27,10 @@ def add():
 
 
 @cli.command()
+@click.argument('id', default=None, type=int)
 def delete(id):
     con = sqllite_connect()
-    cur = sql_delete_account(con, id)
+    sql_delete_account(con, str(id))
     con.close()
 
 @cli.command()

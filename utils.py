@@ -74,6 +74,7 @@ def sql_delete_account(con, id):
     cursor = con.cursor()
     try:
         cursor.execute("DELETE FROM accounts WHERE id=?",id) # delete row
+        con.commit()
     except sql.Error as error:
         click.echo("Error deleting account, make sure id is correct: " + error)
 
@@ -89,6 +90,7 @@ def is_blank(string):
     return False
 
 def prompt_field(prompt):
+    """prompt user for a for a field"""
     field = click.prompt(prompt, default="",show_default=False)
     if is_blank(field): field = None
     return field

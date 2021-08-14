@@ -15,7 +15,7 @@ def sql_create_table(con):
     con.commit()
 
 def sql_reset_table(con):
-    """resets account table"""
+    """resets accounts table"""
     cursor = con.cursor()
     cursor.execute("DROP TABLE accounts")
     sql_create_table(con)
