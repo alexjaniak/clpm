@@ -1,2 +1,2 @@
-# tbpm
-simply a terminal-based-password-manager (tbpm) 
+# clpm
+simply a command-line password manager (clpm)
