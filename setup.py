@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='tbpm',
+    name='clpm',
     version='0.1.0',
     py_modules=['tbpm'],
     install_requires=[
