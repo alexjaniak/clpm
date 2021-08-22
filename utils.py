@@ -1,6 +1,7 @@
 from prettytable import from_db_cursor
 from sql_utils import *
 import click 
+import hashlib
 
 def print_table(cursor):
     """Prints table of accounts."""
@@ -29,7 +30,12 @@ def prompt_rfield(prompt, prompt_name):
 def qprompt(string):
     """Quit option for prompt."""
     if not string == None and string.strip() == "q":
-        click.echo("Prompt quit.")
+        click.echo("Aborted!")
         return True
     return False
 
+def digest_sha_256(string):
+    """Hashes string and returns digest using SHA-256."""
+    encoded = string.encode() # convert to bytes
+    hashed = hashlib.sha256(encoded) # hash using SHA-256
+    return hashed.digest() # convert to digest

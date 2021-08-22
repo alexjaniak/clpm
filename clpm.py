@@ -1,37 +1,60 @@
+from enum import Flag
+from sql_utils import sql_compare_master, sql_connect
+
+from click.decorators import confirmation_option
 from utils import *
 
 @click.group()
-def cli():
+@click.version_option()
+def cli(): # click command group
     pass
 
 @cli.command()
-def add():
+@click.option(
+    "--password", prompt=True, hide_input=True,
+    confirmation_prompt=False
+)
+def add(password):
     """Adds account to database."""
-    click.echo("Enter account details (\033[37;1m!\033[0m = required).")
-    click.echo("Press \033[37;1mq\033[0m to quit.")
-
-    account = prompt_rfield("\033[37;1m!\033[0mAccount", "account")
-    if qprompt(account): return None
-    user = prompt_field('Username')
-    if qprompt(user): return None
-    email = prompt_field('Email')
-    if qprompt(email): return None
-    tag = prompt_field('Tag')
-    if qprompt(tag): return None
-    password = prompt_rfield("\033[37;1m!\033[0mPassword", "password")
-    if qprompt(password): return None
-
     con = sql_connect()
-    sql_insert(con, (account, user, password, email, tag))
+    digest = digest_sha_256(password) # hash password
+    if sql_compare_master(con, digest): # compare password to master
+        # menu for adding accounts
+        click.echo("Enter account details (\033[37;1m!\033[0m = required).") # bright white unicode
+        click.echo("Press \033[37;1mq\033[0m to quit.") # bright white unicode
+
+        account = prompt_rfield("\033[37;1m!\033[0mAccount", "account") # bright white unicode
+        if qprompt(account): return None # quit 
+        user = prompt_field('Username')
+        if qprompt(user): return None
+        email = prompt_field('Email')
+        if qprompt(email): return None
+        tag = prompt_field('Tag')
+        if qprompt(tag): return None
+        password = prompt_rfield("\033[37;1m!\033[0mPassword", "password")
+        if qprompt(password): return None
+
+        # insert account using user input
+        sql_insert_account(con, (account, user, password, email, tag))
+    else:
+         click.echo("Password does not match database password.")
     con.close()
 
 
 @cli.command()
 @click.argument('id', default=None, type=int)
-def delete(id):
+@click.option(
+    "--password", prompt=True, hide_input=True,
+    confirmation_prompt=False
+)
+def delete(id, password):
     """Deletes account from database."""
     con = sql_connect()
-    sql_delete_account(con, str(id))
+    digest = digest_sha_256(password) # hash password
+    if sql_compare_master(con, digest): # compare password to master
+        sql_delete_account(con, str(id))
+    else:
+         click.echo("Password does not match database password.")
     con.close()
 
 @cli.command()
@@ -44,36 +67,63 @@ def delete(id):
 @click.option('-l','--all', 'type_', flag_value='all',
                 help="Query all.")
 @click.argument('val', default=None, required=False)
-def query(type_, val):
+@click.option(
+    "--password", prompt=True, hide_input=True,
+    confirmation_prompt=False
+)
+def query(type_, val, password):
     """Query database."""
     con = sql_connect()
-    if val == None or type_ == 'all':
-        cur = sql_fetch_all(con)
+    digest = digest_sha_256(password) # hash password
+    if sql_compare_master(con, password): # compare password to master
+        if val == None or type_ == 'all': # 
+            cur = sql_fetch_all_acounts(con)
+        else:
+            if type_ == 'accounts':
+                cur = sql_query_accounts(con, val)
+            elif type_ == 'tags':
+                cur = sql_query_tags(con, val)
+            elif type_ == 'id':
+                cur = sql_query_id(con, val)
+        print_table(cur)
     else:
-        if type_ == 'accounts':
-            cur = sql_query_accounts(con, val)
-        elif type_ == 'tags':
-            cur = sql_query_tags(con, val)
-        elif type_ == 'id':
-            cur = sql_query_id(con, val)
-    print_table(cur)
+         click.echo("Password does not match database password.")
     con.close()
 
 @cli.command()
-def init():
+@click.option(
+    "--password", prompt=True, hide_input=True,
+    confirmation_prompt=True
+)
+def init(password):
     """Initializes clpm."""
     con = sql_connect()
-    sql_create_table(con)
+    digest = digest_sha_256(password) # hash password
+    sql_create_accounts_table(con) 
+    sql_init_master_table(con, digest) # sets master assword
     print("Database initialized")
     con.close()
 
 @cli.command()
-@click.confirmation_option(prompt="Are you sure you want to reset the db? All data will be lost.")
-def reset():
-    """Resets database."""
+@click.option('-i','--init','run_init', is_flag=True,
+                help="Run init.")
+@click.confirmation_option(prompt="Are you sure you want to reset clpm? All data will be lost.")
+@click.option(
+    "--password", prompt=True, hide_input=True,
+    confirmation_prompt=True
+)
+def reset(run_init, password):
+    """Resets clpm."""
     con = sql_connect()
-    sql_reset_table(con)
-    print("Database reset")
+    digest = digest_sha_256(password) # hash password
+    if sql_compare_master(con, digest): # compare password to master
+        sql_drop_accounts_table(con)
+        sql_drop_master_table(con)
+        print("Database reset")
+        if run_init: 
+            init()
+    else:
+        click.echo("Password does not match database password.")
     con.close()
 
 
