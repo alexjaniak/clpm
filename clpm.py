@@ -1,6 +1,5 @@
 from enum import Flag
-from sql_utils import sql_compare_master, sql_connect
-
+from sql_utils import *
 from click.decorators import confirmation_option
 from utils import *
 
@@ -17,8 +16,7 @@ def cli(): # click command group
 def add(password):
     """Adds account to database."""
     con = sql_connect()
-    digest = digest_sha_256(password) # hash password
-    if sql_compare_master(con, digest): # compare password to master
+    if sql_compare_master(con, password): # compare password to master
         # menu for adding accounts
         click.echo("Enter account details (\033[37;1m!\033[0m = required).") # bright white unicode
         click.echo("Press \033[37;1mq\033[0m to quit.") # bright white unicode
@@ -50,8 +48,7 @@ def add(password):
 def delete(id, password):
     """Deletes account from database."""
     con = sql_connect()
-    digest = digest_sha_256(password) # hash password
-    if sql_compare_master(con, digest): # compare password to master
+    if sql_compare_master(con, password): # compare password to master
         sql_delete_account(con, str(id))
     else:
          click.echo("Password does not match database password.")
@@ -74,7 +71,6 @@ def delete(id, password):
 def query(type_, val, password):
     """Query database."""
     con = sql_connect()
-    digest = digest_sha_256(password) # hash password
     if sql_compare_master(con, password): # compare password to master
         if val == None or type_ == 'all': # 
             cur = sql_fetch_all_acounts(con)
@@ -98,30 +94,24 @@ def query(type_, val, password):
 def init(password):
     """Initializes clpm."""
     con = sql_connect()
-    digest = digest_sha_256(password) # hash password
     sql_create_accounts_table(con) 
-    sql_init_master_table(con, digest) # sets master assword
+    sql_init_master_table(con, password) # sets master assword
     print("Database initialized")
     con.close()
 
 @cli.command()
-@click.option('-i','--init','run_init', is_flag=True,
-                help="Run init.")
 @click.confirmation_option(prompt="Are you sure you want to reset clpm? All data will be lost.")
 @click.option(
     "--password", prompt=True, hide_input=True,
     confirmation_prompt=True
 )
-def reset(run_init, password):
+def reset(password):
     """Resets clpm."""
     con = sql_connect()
-    digest = digest_sha_256(password) # hash password
-    if sql_compare_master(con, digest): # compare password to master
+    if sql_compare_master(con, password): # compare password to master
         sql_drop_accounts_table(con)
         sql_drop_master_table(con)
         print("Database reset")
-        if run_init: 
-            init()
     else:
         click.echo("Password does not match database password.")
     con.close()

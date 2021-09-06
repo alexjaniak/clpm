@@ -115,6 +115,7 @@ def sql_fetch_all_acounts(con):
 def sql_init_master_table(con, password):
     """Creates master password table and inserts master password."""
     cursor = con.cursor()
+    digest = digest_sha_256(password) # hash password
     try:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS master(
@@ -124,7 +125,7 @@ def sql_init_master_table(con, password):
         """)
         cursor.execute("""
         INSERT INTO master(id, password)
-        VALUES (1,?)""", (password,))
+        VALUES (1,?)""", (digest,))
         con.commit()
     except sql.Error as error:
         click.echo("Error initializing master table:")
@@ -139,9 +140,10 @@ def sql_drop_master_table(con):
         click.echo("Error droping master table:")
         raise error
 
-def sql_compare_master(con, digest):
+def sql_compare_master(con, password):
     """Compare string to master password."""
     cursor = con.cursor()
+    digest = digest_sha_256(password) # hash password
     try:
         cursor.execute("""
         SELECT * FROM master

@@ -1,7 +1,8 @@
 from prettytable import from_db_cursor
 from sql_utils import *
 import click 
-import hashlib
+from Crypto.Hash import SHA3_256
+from Crypto.Cipher import AES
 
 def print_table(cursor):
     """Prints table of accounts."""
@@ -35,7 +36,27 @@ def qprompt(string):
     return False
 
 def digest_sha_256(string):
-    """Hashes string and returns digest using SHA-256."""
-    encoded = string.encode() # convert to bytes
-    hashed = hashlib.sha256(encoded) # hash using SHA-256
-    return hashed.digest() # convert to digest
+    """Hashes string and returns hexdigest using SHA-256."""
+    bstring = string.encode() # convert to bytes
+    sha_256 = SHA3_256.new() # sha_256 encoder
+    sha_256.update(bstring) # encode string
+    return sha_256.hexdigest() # return hexdigest
+
+def get_private_key(password):
+    return None
+
+def encode_aes_256(string, key):
+    cipher = AES.new(key, AES.MODE_EAX)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(string)
+    return ciphertext, nonce, tag
+
+def decode_aes_256(ciphertext, key, nonce, tag):
+    cipher = AES.new(key, AES.AES.MODE_EAX, nonce=nonce)
+    text = cipher.decrypt(ciphertext)
+    try:
+        cipher.verify(tag)
+    except ValueError:
+        print("Key incorrect or message corrupted")
+
+    return text

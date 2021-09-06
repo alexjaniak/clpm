@@ -3,10 +3,11 @@ from setuptools import setup
 setup(
     name='clpm',
     version='0.1.0',
-    py_modules=['tbpm'],
+    py_modules=['clpm'],
     install_requires=[
         'Click',
-        'prettytable'
+        'prettytable',
+        'pycryptodome'
     ],
     entry_points={
         'console_scripts': [
