@@ -43,7 +43,10 @@ def digest_sha_256(string):
     return sha_256.hexdigest() # return hexdigest
 
 def get_private_key(password):
-    return None
+    salt = get_random_bytes(32)
+    encoded = password.encode('UTF-8')
+    key = KDF.scrypt(encoded, salt, 32, N=2**14, r=8, p=1)
+    return key, salt
 
 def encode_aes_256(string, key):
     cipher = AES.new(key, AES.MODE_EAX)
