@@ -23,7 +23,9 @@ def sql_create_accounts_table(con):
             username VARCHAR(255),
             password VARCHAR(255) NOT NULL,
             email VARCHAR(255),
-            tag VARCHAR(50) DEFAULT 'NONE'
+            tag VARCHAR(50) DEFAULT 'NONE',
+            iv CHAR(32),
+            salt CHAR(32)
         )""")
         con.commit()
     except sql.Error as error:
@@ -45,8 +47,8 @@ def sql_insert_account(con, vals):
     cursor = con.cursor()
     try:
         cursor.execute("""
-        INSERT INTO accounts (account, username, password, email, tag)
-        VALUES (?,?,?,?,?)
+        INSERT INTO accounts (account, username, password, email, tag, iv, salt)
+        VALUES (?,?,?,?,?,?,?)
         """, vals)
         con.commit()
     except sql.Error as error:
@@ -64,6 +66,7 @@ def sql_delete_account(con, id_):
         raise error
 
 
+# this is gonna need a fix for password encryption (aka decrypt acc then get list)
 def sql_query_accounts(con, account):
     """Returns cursor of accounts that match specific account 
     from the account table."""

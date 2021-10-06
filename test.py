@@ -15,14 +15,20 @@ def encode_aes_256(string, key):
     return ciphertext, nonce, tag
 
 def decode_aes_256(ciphertext, key, nonce, tag):
-    cipher = AES.new(key, AES.AES.MODE_EAX, nonce=nonce)
+    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
     text = cipher.decrypt(ciphertext)
     try:
         cipher.verify(tag)
     except ValueError:
         print("Key incorrect or message corrupted")
-
     return text
 
 if __name__== '__main__': 
-    print(get_private_key("08082002"))
+    key, salt = get_private_key("08082002")
+    string = "this gets encrypted"
+    ciphertext, nonce, tag = encode_aes_256(string.encode('UTF-8'), key)
+    decoded = decode_aes_256(ciphertext, key, nonce=nonce, tag=tag)
+    print(string)
+    print(ciphertext, nonce, tag)
+    print(decoded)
+    

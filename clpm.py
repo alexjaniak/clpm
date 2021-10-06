@@ -1,6 +1,4 @@
-from enum import Flag
 from sql_utils import *
-from click.decorators import confirmation_option
 from utils import *
 
 @click.group()
@@ -29,11 +27,12 @@ def add(password):
         if qprompt(email): return None
         tag = prompt_field('Tag')
         if qprompt(tag): return None
-        password = prompt_rfield("\033[37;1m!\033[0mPassword", "password")
+        acc_password = prompt_rfield("\033[37;1m!\033[0mPassword", "password")
         if qprompt(password): return None
 
         # insert account using user input
-        sql_insert_account(con, (account, user, password, email, tag))
+        ct, iv, salt = encrypt_password(password, acc_password)
+        sql_insert_account(con, (account, user, ct, email, tag, iv, salt))
     else:
          click.echo("Password does not match database password.")
     con.close()
@@ -81,7 +80,7 @@ def query(type_, val, password):
                 cur = sql_query_tags(con, val)
             elif type_ == 'id':
                 cur = sql_query_id(con, val)
-        print_table(cur)
+        print_table(cur, password)
     else:
          click.echo("Password does not match database password.")
     con.close()
