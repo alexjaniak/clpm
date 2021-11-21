@@ -9,7 +9,7 @@ from scripts.utils import *
 
 
 @click.group()
-@click.version_option()
+@click.version_option(version=1.0)
 def cli(): # click command group.
     pass
 

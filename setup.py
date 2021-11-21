@@ -1,8 +1,15 @@
 from setuptools import setup, find_packages
+from pathlib import Path
 
 setup(
     name='clpm',
-    version='0.1.0',
+    version='1.0',
+    description="A command-line password manager",
+    long_description= (Path(__file__).parent / "README.md").read_text(),
+    long_description_content_type="text/markdown",
+    author="alexjaniak",
+    license="MIT 2021",
+    url="https://github.com/alexjaniak/clpm",
     packages = find_packages(),
     include_package_data=True,
     install_requires=[
