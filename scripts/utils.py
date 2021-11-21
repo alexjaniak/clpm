@@ -1,6 +1,13 @@
-from prettytable import from_db_cursor
+# PROJECT: CLPM -- Command Line Password Manager
+# AUTHOR: alexjaniak
+# FILE: General helper functions.
+
+
+# IMPORTS
+from scripts.sql_utils import *
 import prettytable
-from sql_utils import *
+import os
+from pathlib import Path
 import click 
 from Crypto.Hash import SHA3_256
 from Crypto.Cipher import AES
@@ -10,15 +17,16 @@ from base64 import b64encode, b64decode
 from Crypto.Random import get_random_bytes
 
 def print_table(cursor, password):
-    rows = cursor.fetchall()
+    """Print a table from cursor."""
+    rows = cursor.fetchall() # Get all rows from the cursor. 
     table = prettytable.PrettyTable()
     table.field_names = ["id", "accounts", "username", "password", "email", "tag"]
     for row in rows:
-        row = list(row)
-        key, salt = get_private_key(password, salt=row[7])
+        row = list(row) # Split into a list of elements.
+        key, salt = get_private_key(password, salt=row[7]) # Get key hash
         row[3] = decode_aes_256(row[3], key, row[6])
         table.add_row(row[:6])
-    print(table.get_string())
+    click.echo(table.get_string())
 
 def is_blank(string):
     """Checks if string is either empty or just whitespace."""
@@ -48,18 +56,20 @@ def qprompt(string):
 
 def digest_sha_256(string):
     """Hashes string and returns hexdigest using SHA-256."""
-    bstring = string.encode() # convert to bytes
-    sha_256 = SHA3_256.new() # sha_256 encoder
-    sha_256.update(bstring) # encode string
-    return sha_256.hexdigest() # return hexdigest
+    bstring = string.encode() # Convert to bytes.
+    sha_256 = SHA3_256.new() # SHA_256 encoder.
+    sha_256.update(bstring) # Encode string.
+    return sha_256.hexdigest() # Return hexdigest.
 
 def get_private_key(password, salt = None):
+    """Creates key from password."""
     if salt == None: salt = get_random_bytes(32)
-    encoded = password.encode('UTF-8')
-    key = KDF.scrypt(encoded, salt, 32, N=2**14, r=8, p=1)
+    encoded = password.encode('UTF-8') # Encode into bytes. 
+    key = KDF.scrypt(encoded, salt, 32, N=2**14, r=8, p=1) 
     return key, salt
 
 def encode_aes_256(text, key):
+    """Encodes a string using AES-256."""
     cipher = AES.new(key, AES.MODE_CBC)
     ct_b = cipher.encrypt(pad(text.encode('UTF-8'), AES.block_size))
     iv = b64encode(cipher.iv).decode('utf-8')
@@ -67,6 +77,7 @@ def encode_aes_256(text, key):
     return ct, iv
 
 def decode_aes_256(ciphertext, key, iv):
+    """Decodes a AES-256 encoded string."""
     try:
         iv = b64decode(iv)
         ct = b64decode(ciphertext)
@@ -77,6 +88,7 @@ def decode_aes_256(ciphertext, key, iv):
         print("Incorrect decryption")
 
 def encrypt_password(password, acc_password):
+    """Encodes a string (acc_password) using the key generated from (password)."""
     key, salt = get_private_key(password)
     ct, iv = encode_aes_256(acc_password, key)
     return ct, iv, salt

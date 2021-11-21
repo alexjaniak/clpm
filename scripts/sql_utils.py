@@ -1,11 +1,20 @@
-import sqlite3 as sql
-import click 
-from utils import * 
+# PROJECT: CLPM -- Command Line Password Manager
+# AUTHOR: alexjaniak
+# FILE: SQL helper functions.
 
-def sql_connect(db = 'passwords.db'):
-    """Connects/Creates passwords database."""
+
+# IMPORTS
+import sqlite3 as sql
+from scripts.utils import * 
+
+def sql_connect():
+    """Connects/Creates to database."""
     try:
-        con = sql.connect(db)
+        # Get db path.
+        project_dir = str(Path(__file__).parents[1].absolute()) 
+        db_path = os.path.join(project_dir, "passwords.db")
+        
+        con = sql.connect(db_path) # Connect to db. 
         return con
 
     except sql.Error as error:
@@ -13,9 +22,9 @@ def sql_connect(db = 'passwords.db'):
         raise error
 
 def sql_create_accounts_table(con):
-    """Creates accounts table."""
+    """Creates accounts table. Holds all of the account information & encrypted passwords."""
     try: 
-        cursor = con.cursor()
+        cursor = con.cursor() 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS accounts(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +42,7 @@ def sql_create_accounts_table(con):
         raise error
 
 def sql_drop_accounts_table(con):
-    """Resets account table."""
+    """Drops accounts table."""
     cursor = con.cursor()
     try:
         cursor.execute("DROP TABLE IF EXISTS accounts")
@@ -43,7 +52,11 @@ def sql_drop_accounts_table(con):
         raise error
 
 def sql_insert_account(con, vals):
-    """Insert a row into the accounts table."""
+    """
+        Insert a row/account into the accounts table.
+        param vals: (account, username, password, email, tag, iv, salt)
+        tag, iv, & salt are required for password decryption. 
+    """
     cursor = con.cursor()
     try:
         cursor.execute("""
@@ -56,55 +69,54 @@ def sql_insert_account(con, vals):
         raise error
 
 def sql_delete_account(con, id_):
-    """Deletes an account from the accounts table."""
+    """
+        Deletes an account from the accounts table.
+        param id_: row/account id 
+    """
     cursor = con.cursor()
     try:
-        cursor.execute("DELETE FROM accounts WHERE id=?",id_) # delete row
+        cursor.execute("DELETE FROM accounts WHERE id=?", id_) # Delete row.
         con.commit()
     except sql.Error as error:
-        click.echo("Error deleting account, make sure id is correct:")
+        click.echo("Error deleting account, make sure id exists:")
         raise error
 
 
-# this is gonna need a fix for password encryption (aka decrypt acc then get list)
 def sql_query_accounts(con, account):
-    """Returns cursor of accounts that match specific account 
-    from the account table."""
+    """Returns cursor of accounts that match specific account from the accounts table."""
     cursor = con.cursor()
     try:
         cursor.execute("""
         SELECT * FROM accounts
         WHERE account=?
         """, (account,))
-        return cursor # returns cursor query
+        return cursor # Return cursor query
     except sql.Error as error:
         click.echo("Error querying accounts:")
         raise error
 
 def sql_query_tags(con, tag):
-    """Returns cursor of accounts that match specific tag
-    from the account table."""
+    """Returns cursor of accounts that match specific tag from the accounts table."""
     cursor = con.cursor()
     try:
         cursor.execute("""
         SELECT * FROM accounts
         WHERE tag=?
         """, (tag,))
-        return cursor # returns cursor query
+        return cursor # Return cursor query
     except sql.Error as error:
         click.echo("Error querying accounts:")
         raise error
 
 def sql_query_id(con, id_):
-    """Returns cursor of accounts that match specific id
-    from the account table."""
+    """Returns cursor of accounts that match specific id from the accounts table."""
     cursor = con.cursor()
     try:
         cursor.execute("""
         SELECT * FROM accounts
         WHERE id=?
         """, (id_,))
-        return cursor # returns cursor query
+        return cursor # Return cursor query
     except sql.Error as error:
         click.echo("Error querying accounts:")
         raise error
@@ -112,13 +124,13 @@ def sql_query_id(con, id_):
 def sql_fetch_all_acounts(con):
     """Return cursor with all rows from the accounts table."""
     cursor = con.cursor()
-    cursor.execute("SELECT * FROM accounts") # selects all rows
-    return cursor # returns cursor query
+    cursor.execute("SELECT * FROM accounts") # Select all rows.
+    return cursor # Return cursor query
 
 def sql_init_master_table(con, password):
     """Creates master password table and inserts master password."""
     cursor = con.cursor()
-    digest = digest_sha_256(password) # hash password
+    digest = digest_sha_256(password) # Hash password using 256 bit SHA.
     try:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS master(
@@ -135,23 +147,24 @@ def sql_init_master_table(con, password):
         raise error
 
 def sql_drop_master_table(con):
+    """Drops master password table."""
     cursor = con.cursor()
     try:
         cursor.execute("DROP TABLE IF EXISTS master")
         con.commit()
     except sql.Error as error:
-        click.echo("Error droping master table:")
+        click.echo("Error erasing master table:")
         raise error
 
 def sql_compare_master(con, password):
     """Compare string to master password."""
     cursor = con.cursor()
-    digest = digest_sha_256(password) # hash password
+    digest = digest_sha_256(password) # Hash string using 256 bit SHA.
     try:
         cursor.execute("""
         SELECT * FROM master
         WHERE id=1 """) 
-        master_pass = cursor.fetchone()[1] # returns row as list of cols
+        master_pass = cursor.fetchone()[1] # Returns row as list of cols.
 
     except sql.Error as error:
         click.echo("Error comparing master to input:")

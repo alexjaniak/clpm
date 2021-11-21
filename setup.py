@@ -1,9 +1,10 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='clpm',
     version='0.1.0',
-    py_modules=['clpm'],
+    packages = find_packages(),
+    include_package_data=True,
     install_requires=[
         'Click',
         'prettytable',
@@ -11,7 +12,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'clpm = clpm:cli',
+            'clpm = scripts.clpm:cli',
         ],
     },
 )
