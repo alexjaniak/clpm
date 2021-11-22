@@ -4,7 +4,7 @@
 
 
 # IMPORTS
-from scripts.sql_utils import *
+from clpm.sql_utils import *
 import prettytable
 import os
 from pathlib import Path

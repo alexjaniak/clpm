@@ -19,7 +19,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'clpm = scripts.clpm:cli',
+            'clpm = clpm.main:cli',
         ],
     },
 )

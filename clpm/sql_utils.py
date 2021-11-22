@@ -5,13 +5,13 @@
 
 # IMPORTS
 import sqlite3 as sql
-from scripts.utils import * 
+from clpm.utils import * 
 
 def sql_connect():
     """Connects/Creates to database."""
     try:
         # Get db path.
-        project_dir = str(Path(__file__).parents[1].absolute()) 
+        project_dir = str(Path(__file__).parent.absolute()) 
         db_path = os.path.join(project_dir, "passwords.db")
         
         con = sql.connect(db_path) # Connect to db. 

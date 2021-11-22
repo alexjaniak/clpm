@@ -4,8 +4,8 @@
 
 
 # IMPORTS
-from scripts.sql_utils import *
-from scripts.utils import *
+from clpm.sql_utils import *
+from clpm.utils import *
 
 
 @click.group()
