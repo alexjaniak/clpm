@@ -3,7 +3,7 @@ from pathlib import Path
 
 setup(
     name='clpm',
-    version='1.0',
+    version='1.3',
     description="A command-line password manager",
     long_description= (Path(__file__).parent / "README.md").read_text(),
     long_description_content_type="text/markdown",
