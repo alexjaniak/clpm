@@ -14,6 +14,7 @@ A prompt & confirmation will appear to input a master password.
 * Encrypt all account information rather than just passwords.
 * Add usage to the README.
 * Revamp menu.
+* Fix double init/reset error
 
 
 
