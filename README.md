@@ -15,7 +15,7 @@ A prompt & confirmation will appear to input a master password.
 * Add usage to the README.
 * Revamp menu.
 * Fix double init/reset error
-
+* Clear terminal history after query/add
 
 
 
