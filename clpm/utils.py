@@ -86,6 +86,7 @@ def decode_aes_256(ciphertext, key, iv):
         return text.decode('UTF-8')
     except (ValueError, KeyError) as e:
         print("Incorrect decryption")
+        raise 
 
 def encrypt_password(password, acc_password):
     """Encodes a string (acc_password) using the key generated from (password)."""
