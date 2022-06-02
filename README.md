@@ -5,24 +5,17 @@ CLPM is a is an easy-to-use out-of-the-box password manager accesible solely thr
 ## Installation
 
 ### Requirements
-python >= 3.9
-pip >= 21.1.2
+python >= 3.9 & pip >= 21.1.2
 
-### Directly through pip
-The easiest way to install is through pip: 
-```
-pip install clpm
-```
-Then run `clpm init` to initialize the database.
-A prompt & confirmation will appear to input a master password.
+### Remotely through pip
+1. Run `pip install clpm`
+2. Run `clpm init` to initialize the database. A prompt & confirmation will appear to input a master password.
 
 *Note: clpm will not work unless a master password is set through `clpm init` first.*
 
-### As a Local Copy
-If you prefer to install manually:
+### Local Install
 1. Clone this repo
 2. Run `python setup.py install`
-
 
 ## Usage
 
